@@ -3,7 +3,7 @@ from math import sqrt, pow
 
 from loguru import logger
 
-from book.models import User, Book, Rate
+from movie.models import User, Movie, Rate
 
 
 class UserCf:
@@ -39,12 +39,12 @@ class UserCf:
         return self.data[username1], self.data[username2]
 
     # 计算两个用户的皮尔逊相关系数
-    def pearson(self, user1, user2):  # 数据格式为：书籍id，浏览次数
+    def pearson(self, user1, user2):  # 数据格式为：电影id，浏览次数
         sumXY, n = 0.0, 0.0
         sumX, sumY = 0.0, 0.0
         sumX2, sumY2 = 0.0, 0.0
         for movie1, score1 in user1.items():
-            if movie1 in user2.keys():  # 计算公共的书籍浏览次数
+            if movie1 in user2.keys():  # 计算公共的电影浏览次数
                 n += 1
                 sumXY += score1 * user2[movie1]
                 sumX += score1
@@ -79,20 +79,20 @@ class UserCf:
 
         return closest_distance[:n]
 
-    # 给用户推荐书籍
+    # 给用户推荐电影
     def recommend(self, username, n=1):
         recommend = {}
         nearest_user = self.nearest_user(username, n)
         for user, score in dict(nearest_user).items():  # 最相近的n个用户
-            for book_id, scores in self.data[user].items():  # 推荐的用户的书籍列表
-                if book_id not in self.data[username].keys():  # 当前username没有看过
-                    rate = Rate.objects.filter(book_id=book_id, user__username=user)
-                    # 如果用户评分低于3分，则表明用户不喜欢此书籍，则不推荐给别的用户
+            for movie_id, scores in self.data[user].items():  # 推荐的用户的电影列表
+                if movie_id not in self.data[username].keys():  # 当前username没有看过
+                    rate = Rate.objects.filter(movie_id=movie_id, user__username=user)
+                    # 如果用户评分低于3分，则表明用户不喜欢此电影，则不推荐给别的用户
                     if rate and rate.first().mark < 3:
                         continue
-                    if book_id not in recommend.keys():  # 添加到推荐列表中
-                        recommend[book_id] = scores
-        # 对推荐的结果按照书籍浏览次数排序
+                    if movie_id not in recommend.keys():  # 添加到推荐列表中
+                        recommend[movie_id] = scores
+        # 对推荐的结果按照电影浏览次数排序
         return sorted(recommend.items(), key=operator.itemgetter(1), reverse=True)
 
 
@@ -101,8 +101,8 @@ def recommend_by_user_cf(user_id, n=15, topk=15):
     current_user = User.objects.get(id=user_id)
     # 如果当前用户没有打分 则按照热度顺序返回
     if current_user.rate_set.count() == 0:
-        book_list = Book.objects.all().order_by("-sump")[:topk]
-        return book_list
+        movie_list = Movie.objects.all().order_by("-sump")[:topk]
+        return movie_list
 
     users = User.objects.all()
     all_user = {}
@@ -112,7 +112,7 @@ def recommend_by_user_cf(user_id, n=15, topk=15):
         # 用户有给图书打分
         if rates:
             for i in rates:
-                rate.setdefault(str(i.book.id), i.mark)
+                rate.setdefault(str(i.movie.id), i.mark)
             all_user.setdefault(user.username, rate)
         else:
             # 用户没有为书籍打过分，设为0
@@ -124,7 +124,7 @@ def recommend_by_user_cf(user_id, n=15, topk=15):
 
     if not good_list:
         # 如果没有找到相似用户喜欢的书则按照热度顺序返回
-        book_list = Book.objects.all().order_by("-sump")[:topk]
-        return book_list
+        movie_list = Movie.objects.all().order_by("-sump")[:topk]
+        return movie_list
 
-    return Book.objects.filter(id__in=good_list).order_by("-sump")[:topk]
+    return Movie.objects.filter(id__in=good_list).order_by("-sump")[:topk]
