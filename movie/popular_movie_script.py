@@ -5,12 +5,14 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recommend.settings")
 django.setup()
 
 import re
-from .models import Movie, Tags
+from movie.models import Movie, Tags
 
 Movie.objects.all().delete()
 Tags.objects.all().delete()
 
-with open('../data/movies.csv', 'r', encoding='utf-8') as f:
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+movie_path = os.path.join(BASE_DIR, "data/movie.csv")
+with open(movie_path, 'r', encoding='utf-8') as f:
     for line in f.readlines()[1:]:
         _id, name, image_link, country, years, director_description, leader, star, description, tags, flag = tuple(
             line.strip().split(','))

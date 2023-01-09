@@ -1,11 +1,11 @@
 import os
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "movie.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recommend.settings")
 django.setup()
 
 import random
-from .models import Movie, User, Rate
+from movie.models import Movie, User, Rate
 
 strs = 'abcdefghijk_mnopqrstuvwxyz'
 
@@ -21,16 +21,16 @@ def random_phone():
 
 
 def random_movie_id(num=5):
-    book_nums = Movie.objects.all().order_by('?').values('id')[:num]
-    print(book_nums)
-    return [book['id'] for book in book_nums]
+    movie_nums = Movie.objects.all().order_by('?').values('id')[:num]
+    print(movie_nums)
+    return [movie['id'] for movie in movie_nums]
 
 
 def random_mark():
-    return random.randint(1, 5)
+    return random.randint(1, 10)
 
 
-def populate_user_rating(user_numbers):
+def popular_user_rating(user_numbers):
     for i in range(user_numbers):
         user_name = random_user_name()
         print(user_name)
@@ -49,6 +49,4 @@ def populate_user_rating(user_numbers):
 
 
 if __name__ == '__main__':
-    # random_movie_id()
-    # 随机生成用户打分 参数为生成数量
-    populate_user_rating(20)
+    popular_user_rating(100)  # 随机生成用户打分 参数为生成数量

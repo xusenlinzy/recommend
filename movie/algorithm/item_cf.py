@@ -1,7 +1,7 @@
 import operator
 from math import sqrt
 
-from movie.models import Rate
+from movie.models import Rate, Movie
 
 
 class ItemCf:
@@ -23,7 +23,7 @@ class ItemCf:
 
         datas = {}
         for rate in rates:
-            user_id = rates.user_id
+            user_id = rate.user_id
             if user_id not in datas:
                 datas.setdefault(user_id, {})
                 datas[user_id][rate.movie.id] = rate.mark
@@ -73,7 +73,7 @@ class ItemCf:
                 if j not in data[user].keys():  # 该相似的物品不在⽤户user的记录⾥
                     rank.setdefault(j, 0)
                     rank[j] += float(score) * w  # 预测兴趣度=评分*相似度
-
+        print(rank)
         return sorted(rank.items(), key=operator.itemgetter(1), reverse=True)[:topk]
 
     def recommendation(self, n=15, topk=10):
@@ -89,4 +89,6 @@ class ItemCf:
 
 
 def recommend_by_item_cf(user_id, n=15, topk=15):
-    return ItemCf(user_id).recommendation(n, topk)
+    sort_rank = ItemCf(user_id).recommendation(n, topk)
+    print(sort_rank)
+    return Movie.objects.filter(id__in=[i[0] for i in sort_rank]).order_by("-sump")
