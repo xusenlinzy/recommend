@@ -73,7 +73,6 @@ class ItemCf:
                 if j not in data[user].keys():  # 该相似的物品不在⽤户user的记录⾥
                     rank.setdefault(j, 0)
                     rank[j] += float(score) * w  # 预测兴趣度=评分*相似度
-        print(rank)
         return sorted(rank.items(), key=operator.itemgetter(1), reverse=True)[:topk]
 
     def recommendation(self, n=15, topk=10):
@@ -88,7 +87,8 @@ class ItemCf:
         return sort_rank
 
 
-def recommend_by_item_cf(user_id, n=15, topk=15):
+def recommend_by_item_cf(user_id, n=15, topk=15, return_queryset=True):
     sort_rank = ItemCf(user_id).recommendation(n, topk)
-    print(sort_rank)
+    if not return_queryset:
+        return sort_rank
     return Movie.objects.filter(id__in=[i[0] for i in sort_rank]).order_by("-sump")

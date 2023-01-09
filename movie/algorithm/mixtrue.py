@@ -8,8 +8,8 @@ from .user_cf import recommend_by_user_cf
 def recommend_by_mixture(user_id, n=15, topk=10, w=0.8):
     # 混合推荐算法
     # 推荐列表 = w*P_cu + (1-w)* p_cf
-    cu_list = recommend_by_user_cf(user_id, n, topk)  # 用户协同过滤得到的推荐列表
-    cf_list = recommend_by_item_cf(user_id, n, topk)  # 物品协同过滤得到的推荐列表
+    cu_list = recommend_by_user_cf(user_id, n, topk, return_queryset=False)  # 用户协同过滤得到的推荐列表
+    cf_list = recommend_by_item_cf(user_id, n, topk, return_queryset=False)  # 物品协同过滤得到的推荐列表
     if not cu_list:
         # 用户协同过滤推荐列表为空
         if not cf_list:

@@ -96,7 +96,7 @@ class UserCf:
         return sorted(recommend.items(), key=operator.itemgetter(1), reverse=True)
 
 
-def recommend_by_user_cf(user_id, n=15, topk=15):
+def recommend_by_user_cf(user_id, n=15, topk=15, return_queryset=True):
     # 通过用户协同算法来进行推荐
     current_user = User.objects.get(id=user_id)
     # 如果当前用户没有打分 则按照热度顺序返回
@@ -120,8 +120,10 @@ def recommend_by_user_cf(user_id, n=15, topk=15):
 
     user_cf = UserCf(data=all_user)
     recommend_list = user_cf.recommend(current_user.username, n)
-    good_list = [each[0] for each in recommend_list]
+    if not return_queryset:
+        return recommend_list
 
+    good_list = [each[0] for each in recommend_list]
     if not good_list:
         # 如果没有找到相似用户喜欢的书则按照热度顺序返回
         movie_list = Movie.objects.all().order_by("-sump")[:topk]
